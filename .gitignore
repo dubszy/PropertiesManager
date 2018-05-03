@@ -5,5 +5,7 @@
 
 cmake-build-debug/
 
+build/
+
 *.sh
 *.log
