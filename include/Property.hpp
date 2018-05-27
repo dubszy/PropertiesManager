@@ -1,6 +1,7 @@
 #ifndef _PROPERTY_HPP_
 #define _PROPERTY_HPP_
 
+#include <algorithm>
 #include <string>
 
 using namespace std;
