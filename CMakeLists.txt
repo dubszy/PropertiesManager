@@ -10,4 +10,5 @@ include_directories(googletest/googlemock/include)
 include_directories(googletest/googletest/include)
 
 add_library(PropertiesManager
+        src/Property.cpp
         src/Properties.cpp)

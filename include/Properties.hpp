@@ -36,15 +36,6 @@ private:
     const char *prop_path_;
     Logger *log_;
 
-    template <typename T>
-    bool isUnsigned_() {
-        return  typeid(T) == typeid(unsigned char) ||
-                typeid(T) == typeid(unsigned short) ||
-                typeid(T) == typeid(unsigned int) ||
-                typeid(T) == typeid(unsigned long) ||
-                typeid(T) == typeid(unsigned long long);
-    }
-
     static inline string trim(string str);
 };
 

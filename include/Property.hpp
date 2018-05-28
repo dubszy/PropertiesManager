@@ -9,30 +9,19 @@ using namespace std;
 class Property {
 
 public:
-    static Property *empty;
+    Property(string key, string value);
 
-    Property(string key, string value)
-      : key_(key), value_(value) {}
-
-    string key() {
-        return key_;
-    }
-
-    string value() {
-        return value_;
-    }
-
-    bool valueAsBool() {
-        transform(key_.begin(), key_.end(), key_.begin(), ::tolower);
-        return (key_.compare("true") == 0 ||
-                key_.compare("t") == 0 ||
-                key_.compare("1") == 0);
-    }
+    string key();
+    string value();
+    bool valueAsBool();
 
     template <typename T>
     T valueAsNumber() {
         T value;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
         sscanf(key_.c_str(), ((isUnsigned<T>()) ? "%llu" : "%lld"), &value);
+#pragma GCC diagnostic pop
         return value;
     }
 
