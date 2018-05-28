@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <string>
+#include <typeinfo>
 
 using namespace std;
 
