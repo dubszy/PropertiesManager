@@ -26,6 +26,8 @@ public:
         return value;
     }
 
+    static Property *emptyProperty();
+
 private:
     Property() {};
 

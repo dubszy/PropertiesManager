@@ -3,7 +3,7 @@
 
 #include <cerrno>
 #include <locale>
-#include <string.h>
+#include <cstring>
 #include <utility>
 #include <sys/stat.h>
 
@@ -77,7 +77,7 @@ Property *Properties::get(string key) {
 
     while (fgets(line, 1024, propFd_) != nullptr) {
         line_str = trim(string(line));
-        if (line_str == "") { // ignore empty lines
+        if (line_str.empty()) { // ignore empty lines
             continue;
         }
 
@@ -100,7 +100,7 @@ Property *Properties::get(string key) {
         }
     }
     log_->warn("Property with key \"%s\" not found", key_expect.c_str());
-    return nullptr;
+    return Property::emptyProperty();
 }
 
 void Properties::freePMProps() {
