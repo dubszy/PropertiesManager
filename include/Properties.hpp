@@ -1,10 +1,8 @@
 #ifndef _PROPERTIES_MANAGER_HPP_
 #define _PROPERTIES_MANAGER_HPP_
 
-#include <cerrno>
 #include <cstdio>
 #include <string>
-#include <string.h>
 
 #include <logger/c++/Logger.hpp>
 
@@ -12,28 +10,30 @@
 
 using namespace std;
 
-static Property **pm_props;
-
 // TODO: string comparisons should use the ICU library
 // TODO: add localization support
 class Properties {
 
 public:
-    Properties(const char *prop_path, bool load_pm_props = false);
+    Properties(const char *propPath);
 
     ~Properties();
 
     Property **getPropertyManagerProperties();
 
+    bool propsFileOpen();
+
     Property *get(string key);
+
+    void freePMProps();
 
 private:
     Properties() {};
     Properties(const Properties&);
     Properties& operator=(const Properties&);
 
-    FILE *prop_fd_;
-    const char *prop_path_;
+    FILE *propFd_;
+    string propPath_;
     Logger *log_;
 
     static inline string trim(string str);

@@ -1,51 +1,65 @@
-#include <locale>
-
 #include <Properties.hpp>
-
 #include <Property.hpp>
-#include <utility>
 
-Properties::Properties(const char *prop_path, bool load_pm_props) {
-    if (pm_props == nullptr) {
-        auto *props = new Properties();
-        Logger::setGlobalLogLevel(LogLevelDebug);
-        props->log_ = Logger::forClass<Properties>(LogLevelDebug);
-        props->prop_path_ = ((load_pm_props) ? prop_path : "res/settings/propman/default.properties");
-        props->log_->info("Attempting to load Properties settings file: \"%s\"", props->prop_path_);
-        if ((props->prop_fd_ = fopen(props->prop_path_, "r")) == nullptr) {
-            log_->fatal("Failed to open \"%s\" (%s)", props->prop_path_, strerror(errno));
-            exit(-1);
+#include <cerrno>
+#include <locale>
+#include <string.h>
+#include <utility>
+#include <sys/stat.h>
+
+static Property **pmProps; // PropertiesManager properties
+
+Properties::Properties(const char *propPath) {
+    // If we don't have the PropertiesManager properties loaded
+    if (pmProps == nullptr) {
+        auto *props = new Properties(); // Use the empty constructor so we don't call this recursively
+
+        string pmPropPath = "/etc/propertiesmanager/custom.properties";
+        struct stat pmBuffer {};
+        if (stat(pmPropPath.c_str(), &pmBuffer) != 0) {
+            pmPropPath = "/etc/propertiesmanager/default.properties";
         }
-        pm_props = (Property **)malloc(sizeof(Property));
-        pm_props[0] = new Property("log.level", props->get("log.level")->value());
-        props->log_->debug("Log level: %s", pm_props[0]->value().c_str());
-        delete props;
+
+        props->propPath_ = pmPropPath;
+
+        props->log_ = Logger::forClass<Properties>(LogLevelDebug);
+        props->log_->info("Attempting to load Properties settings file: \"%s\"", props->propPath_.c_str());
+
+        pmProps = (Property **)malloc(sizeof(Property));
+
+        if ((props->propFd_ = fopen(props->propPath_.c_str(), "r")) == nullptr) {
+            props->log_->fatal("Failed to open \"%s\" (%s)", props->propPath_.c_str(), strerror(errno));
+            pmProps[0] = new Property("log.level", "LogLevelInfo");
+        } else {
+            pmProps[0] = new Property("log.level", props->get("log.level")->value());
+            props->log_->debug("Log level: %s", pmProps[0]->value().c_str());
+        }
     }
 
-    if (!load_pm_props) {
-        prop_path_ = prop_path;
-        log_ = Logger::forClass<Properties>(Logger::getLogLevelFromString(pm_props[0]->value()));
-        log_->info("Attempting to open properties file: \"%s\"", prop_path);
-        if ((prop_fd_ = fopen(prop_path, "r")) == nullptr) {
-            log_->error("Failed to open \"%s\" (%s)", prop_path, strerror(errno));
-            return;
-        }
+    propPath_ = propPath;
+    log_ = Logger::forClass<Properties>(Logger::getLogLevelFromString(pmProps[0]->value()));
+    log_->info("Attempting to open properties file: \"%s\"", propPath);
+    if ((propFd_ = fopen(propPath, "r")) == nullptr) {
+        log_->error("Failed to open \"%s\" (%s)", propPath, strerror(errno));
     }
 }
 
 Properties::~Properties() {
     delete log_;
-    free(pm_props);
 }
 
 Property **getPropertyManagerProperties() {
-    return pm_props;
+    return pmProps;
 }
 
 inline string Properties::trim(string str) {
     str.erase(str.begin(), std::find_if(str.begin(), str.end(), not1(ptr_fun<int, int>(isspace))));
     str.erase(find_if(str.rbegin(), str.rend(), not1(ptr_fun<int, int>(isspace))).base(), str.end());
     return str;
+}
+
+bool Properties::propsFileOpen() {
+    return propFd_ != nullptr;
 }
 
 Property *Properties::get(string key) {
@@ -57,11 +71,11 @@ Property *Properties::get(string key) {
         return nullptr;
     }
 
-    char line[1024];
+    char line[1024] = "";
     string line_str;
     string key_found;
 
-    while (fgets(line, 1024, prop_fd_) != nullptr) {
+    while (fgets(line, 1024, propFd_) != nullptr) {
         line_str = trim(string(line));
         log_->debug("Found property: \"%s\"", line_str.c_str());
         size_t eq_index = line_str.find_first_of('=');
@@ -83,4 +97,8 @@ Property *Properties::get(string key) {
     }
     log_->warn("Property with key \"%s\" not found", key_expect.c_str());
     return nullptr;
+}
+
+void Properties::freePMProps() {
+    free(pmProps);
 }

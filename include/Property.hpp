@@ -19,14 +19,16 @@ public:
     template <typename T>
     T valueAsNumber() {
         T value;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat"
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wformat"
         sscanf(key_.c_str(), ((isUnsigned<T>()) ? "%llu" : "%lld"), &value);
-#pragma GCC diagnostic pop
+        #pragma GCC diagnostic pop
         return value;
     }
 
 private:
+    Property() {};
+
     Property(const Property&);
     Property& operator=(const Property&);
 

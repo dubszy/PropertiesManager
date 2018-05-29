@@ -9,7 +9,7 @@ static Property *empty;
 
 Property::Property(string key, string value)
   : key_(key), value_(value) {
-    empty = new Property("", "");
+    empty = new Property();
 }
 
 string Property::key() {
