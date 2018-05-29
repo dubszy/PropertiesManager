@@ -46,6 +46,7 @@ Properties::Properties(const char *propPath) {
 
 Properties::~Properties() {
     delete log_;
+    fclose(propFd_);
 }
 
 Property **getPropertyManagerProperties() {
@@ -74,6 +75,10 @@ Property *Properties::get(string key) {
     char line[1024] = "";
     string line_str;
     string key_found;
+
+    // Make sure we start at the top of the file,
+    // because we won't close the file until destruction
+    rewind(propFd_);
 
     while (fgets(line, 1024, propFd_) != nullptr) {
         line_str = trim(string(line));

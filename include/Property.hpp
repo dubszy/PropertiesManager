@@ -21,7 +21,7 @@ public:
         T value;
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wformat"
-        sscanf(key_.c_str(), ((isUnsigned<T>()) ? "%llu" : "%lld"), &value);
+        sscanf(value_.c_str(), ((isUnsigned<T>()) ? "%llu" : "%lld"), &value);
         #pragma GCC diagnostic pop
         return value;
     }
