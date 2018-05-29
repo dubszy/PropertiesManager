@@ -77,6 +77,10 @@ Property *Properties::get(string key) {
 
     while (fgets(line, 1024, propFd_) != nullptr) {
         line_str = trim(string(line));
+        if (line_str == "") { // ignore empty lines
+            continue;
+        }
+
         log_->debug("Found property: \"%s\"", line_str.c_str());
         size_t eq_index = line_str.find_first_of('=');
         key_found = trim(line_str.substr(0, eq_index));
